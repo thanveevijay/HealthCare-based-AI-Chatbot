@@ -1,96 +1,48 @@
-# symptom_severity_module/tests/test_severity.py
+"""Unit tests for the rule-based symptom severity prototype."""
 
-import sys
 import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+import sys
 
 import pytest
-from colorama import Fore, Style, init
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from src.severity_predictor import SymptomSeverityPredictor
 
-init(autoreset=True)  # Color output
 
-predictor = SymptomSeverityPredictor()
-
-color_map = {
-    "Low Risk": Fore.GREEN,
-    "Moderate Risk": Fore.YELLOW,
-    "High Risk": Fore.RED
-}
+@pytest.fixture
+def predictor():
+    return SymptomSeverityPredictor()
 
 
-def run_test_case(symptoms, expected_risk):
-    """Run a single test case with symptoms and expected risk."""
-    risk = predictor.predict_severity(symptoms)
-
-    # Print details for readability
-    print("\n=== Test Case ===")
-    print("Symptoms:", symptoms)
-    for s in symptoms:
-        print(f"- {s.title()}: Score {predictor.symptom_scores.get(s.lower(), 0)}")
-    print("Expected Risk:", expected_risk)
-    print("Predicted Risk:", color_map[risk] + risk + Style.RESET_ALL)
-
-    # Assertion ensures this is a unit test
-    assert risk == expected_risk, f"FAIL: Expected {expected_risk}, got {risk}"
-
-
-# Unit test functions
-def test_low_risk():
-    run_test_case(["headache"], "Low Risk")
-    run_test_case(["fatigue", "runny nose"], "Low Risk")
+@pytest.mark.parametrize(
+    ("symptoms", "expected"),
+    [
+        (["headache"], "Low Risk"),
+        (["fatigue", "runny nose"], "Low Risk"),
+        (["fever", "cough"], "Moderate Risk"),
+        (["high fever", "body ache"], "Moderate Risk"),
+        (["chest pain", "shortness of breath"], "High Risk"),
+        (["confusion", "persistent high fever", "difficulty breathing"], "High Risk"),
+    ],
+)
+def test_risk_categories(predictor, symptoms, expected):
+    assert predictor.predict_severity(symptoms) == expected
 
 
-def test_moderate_risk():
-    run_test_case(["fever", "cough"], "Moderate Risk")
-    run_test_case(["high fever", "body ache"], "Moderate Risk")
-
-
-def test_high_risk():
-    run_test_case(["chest pain", "shortness of breath"], "High Risk")
-    run_test_case(["confusion", "persistent high fever", "difficulty breathing"], "High Risk")
-
-
-# Optional: to run this script directly without pytest
-if __name__ == "__main__":
-    pytest.main(["-v", "-s"])
-
-
-
-def test_normalizes_whitespace_and_case():
+def test_normalizes_whitespace_and_case(predictor):
     assert predictor.predict_severity(["  HEADACHE  "]) == "Low Risk"
 
 
-def test_empty_or_unknown_symptoms_do_not_add_risk():
+def test_empty_or_unknown_symptoms_do_not_add_risk(predictor):
     assert predictor.predict_severity([]) == "Low Risk"
     assert predictor.predict_severity(["unlisted symptom"]) == "Low Risk"
 
 
-def test_rejects_string_instead_of_symptom_list():
+def test_rejects_string_instead_of_symptom_list(predictor):
     with pytest.raises(TypeError):
         predictor.predict_severity("chest pain")
 
 
-def test_rejects_non_string_symptom_values():
-    with pytest.raises(TypeError):
-        predictor.predict_severity(["headache", None])
-
-
-
-def test_normalizes_whitespace_and_case():
-    assert predictor.predict_severity(["  HEADACHE  "]) == "Low Risk"
-
-
-def test_empty_or_unknown_symptoms_do_not_add_risk():
-    assert predictor.predict_severity([]) == "Low Risk"
-    assert predictor.predict_severity(["unlisted symptom"]) == "Low Risk"
-
-
-def test_rejects_string_instead_of_symptom_list():
-    with pytest.raises(TypeError):
-        predictor.predict_severity("chest pain")
-
-
-def test_rejects_non_string_symptom_values():
+def test_rejects_non_string_symptom_values(predictor):
     with pytest.raises(TypeError):
         predictor.predict_severity(["headache", None])
