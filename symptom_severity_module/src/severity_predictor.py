@@ -76,7 +76,18 @@ class SymptomSeverityPredictor:
         Returns:
             str: The predicted risk level — 'Low Risk', 'Moderate Risk', or 'High Risk'.
         """
-        total_score = sum(self.symptom_scores.get(s.lower(), 0) for s in symptoms)
+        if not isinstance(symptoms, (list, tuple)):
+            raise TypeError("symptoms must be a list or tuple of strings")
+
+        normalized = []
+        for symptom in symptoms:
+            if not isinstance(symptom, str):
+                raise TypeError("each symptom must be a string")
+            value = symptom.strip().lower()
+            if value:
+                normalized.append(value)
+
+        total_score = sum(self.symptom_scores.get(symptom, 0) for symptom in normalized)
         if total_score <= 3:
             return "Low Risk"
         elif total_score <= 7:
