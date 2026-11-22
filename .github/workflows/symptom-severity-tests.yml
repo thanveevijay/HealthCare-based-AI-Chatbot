@@ -1,0 +1,32 @@
+name: Symptom severity tests
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "symptom_severity_module/**"
+      - ".github/workflows/symptom-severity-tests.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "symptom_severity_module/**"
+      - ".github/workflows/symptom-severity-tests.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: symptom_severity_module
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install test dependencies
+        run: python -m pip install pytest colorama
+      - name: Run unit tests
+        run: python -m pytest -v
