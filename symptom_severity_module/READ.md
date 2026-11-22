@@ -4,6 +4,10 @@
 
 This project is a **standalone prototype** for predicting the severity of symptoms. It classifies user-entered symptoms into **Low Risk, Moderate Risk, or High Risk** using a **rule-based scoring system**.
 
+## Safety notice
+
+This is an educational, rule-based demonstration only. It is not clinically validated, does not diagnose conditions, and must not be used to decide whether someone needs medical care. Anyone experiencing severe, sudden, or worsening symptoms should seek professional medical help or contact local emergency services.
+
 ## Features
 
 - Rule-based symptom severity prediction
