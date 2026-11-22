@@ -74,3 +74,23 @@ def test_rejects_string_instead_of_symptom_list():
 def test_rejects_non_string_symptom_values():
     with pytest.raises(TypeError):
         predictor.predict_severity(["headache", None])
+
+
+
+def test_normalizes_whitespace_and_case():
+    assert predictor.predict_severity(["  HEADACHE  "]) == "Low Risk"
+
+
+def test_empty_or_unknown_symptoms_do_not_add_risk():
+    assert predictor.predict_severity([]) == "Low Risk"
+    assert predictor.predict_severity(["unlisted symptom"]) == "Low Risk"
+
+
+def test_rejects_string_instead_of_symptom_list():
+    with pytest.raises(TypeError):
+        predictor.predict_severity("chest pain")
+
+
+def test_rejects_non_string_symptom_values():
+    with pytest.raises(TypeError):
+        predictor.predict_severity(["headache", None])
